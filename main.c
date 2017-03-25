@@ -7,7 +7,6 @@
 #include <inttypes.h>
 
 int main () {
-
     /* https://xcb.freedesktop.org/tutorial/ */
     /* Open the connection to the X server. Use the DISPLAY environment variable */
     int i, screenNum;
