@@ -33,9 +33,9 @@ int main () {
     // Creating the window
     xcb_create_window(con, // Connection
                       XCB_COPY_FROM_PARENT, // Depth
-                      screen->root, // Parent window
                       win, // Id
-                      100,100, // x,y
+                      screen->root, // Parent window
+                      0,0, // x,y
                       150,150, // Size: w,h
                       10, // Border width
                       XCB_WINDOW_CLASS_INPUT_OUTPUT, // Class
