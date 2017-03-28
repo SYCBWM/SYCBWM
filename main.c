@@ -15,6 +15,8 @@ int main () {
     printf("Opening connection\n");
     con = xcb_connect(NULL, &screen_nbr);
 
+    printf("%d\n", xcb_setup_roots_iterator(xcb_get_setup(con)).rem);
+
     // Get the number of screens
     iter = xcb_setup_roots_iterator(xcb_get_setup(con));
     for (; iter.rem; --screen_nbr, xcb_screen_next(&iter)) {
