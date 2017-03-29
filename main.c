@@ -1,10 +1,8 @@
-#include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <xcb/xcb.h>
 #include <jmorecfg.h>
 #include <stdbool.h>
-#include <xcb.h>
 
 int main () {
     xcb_connection_t        *con;               // Connection
@@ -16,6 +14,7 @@ int main () {
     uint32_t                value_list[2];
     boolean                 finished = false;
     xcb_generic_event_t     *event;
+    xcb_key_press_event_t   *btnPressed;
 
     printf("XCB tests:\n");
 
@@ -67,8 +66,10 @@ int main () {
     while(!finished && (event = xcb_wait_for_event(con))) {
         switch(event->response_type) {
             case XCB_KEY_PRESS:
-                printf("Keycode: %d\n", ((xcb_key_press_event_t*)event)->detail);
-                if (((xcb_key_press_event_t*)event)->detail == 9) { // Finish if escape is pressed
+                btnPressed = ((xcb_key_press_event_t*)event);
+                printf("Keycode: %d\n", btnPressed->detail);
+                /* ESC */
+                if (btnPressed->detail == 9) { // Finish if escape is pressed
                     finished = true;
                 }
                 break;
