@@ -6,6 +6,8 @@
 #include <stdbool.h>
 
 int nbrMonitors (xcb_connection_t *con, xcb_window_t root) {
+    xcb_randr_monitor_info_t *infoMonitor;
+
     // Xrandr get monitors
     uint8_t active = 0; // use ?
     xcb_randr_get_monitors_cookie_t cookie = xcb_randr_get_monitors(con, root, active);
@@ -13,6 +15,21 @@ int nbrMonitors (xcb_connection_t *con, xcb_window_t root) {
     // They all seem to be the same
     //printf("Number of monitors : %d\n", test->nMonitors);
     //printf("Number of monitors : %d\n", test->nOutputs);
+
+    xcb_randr_monitor_info_iterator_t monitorIterator = xcb_randr_get_monitors_monitors_iterator(test);
+
+    printf("----Randr monitors info----\n");
+    while (monitorIterator.rem > 0) {
+        infoMonitor = monitorIterator.data;
+        printf("Monitor name: %d\n", infoMonitor->name);
+        printf("Monitor nbr: %d\n", monitorIterator.rem);
+        printf("Primary: %d\n", infoMonitor->primary);
+        printf("%dx%d\n", infoMonitor->width, infoMonitor->height);
+        printf("x offset: %d, y offset: %d\n\n", infoMonitor->x, infoMonitor->y);
+        xcb_randr_monitor_info_next(&monitorIterator);
+    }
+    printf("---------------------------\n");
+
     return xcb_randr_get_monitors_monitors_length(test);
 }
 
@@ -20,7 +37,7 @@ int main () {
     xcb_connection_t        *con;               // Connection
     xcb_screen_t            *screen;            // Screen
     int                     screen_nbr;         // Screen number
-    xcb_screen_iterator_t   iter;               // Screen iterator
+    //xcb_screen_iterator_t   iter;               // Screen iterator
     xcb_window_t            win;                // Window
     uint32_t                value_mask;
     uint32_t                value_list[2];
