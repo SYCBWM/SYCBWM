@@ -5,18 +5,21 @@
 #include <jmorecfg.h>
 #include <stdbool.h>
 
-int nbrMonitors (xcb_connection_t *con, xcb_window_t root) {
+int nbrMonitors(xcb_connection_t *con, xcb_window_t root) {
     xcb_randr_monitor_info_t *infoMonitor;
+    xcb_randr_get_monitors_cookie_t cookie;
+    xcb_randr_get_monitors_reply_t *monitorsReply;
+    xcb_randr_monitor_info_iterator_t monitorIterator;
 
     // Xrandr get monitors
     uint8_t active = 0; // use ?
-    xcb_randr_get_monitors_cookie_t cookie = xcb_randr_get_monitors(con, root, active);
-    xcb_randr_get_monitors_reply_t *test = xcb_randr_get_monitors_reply(con, cookie, NULL);
+    cookie = xcb_randr_get_monitors(con, root, active);
+    monitorsReply = xcb_randr_get_monitors_reply(con, cookie, NULL);
     // They all seem to be the same
     //printf("Number of monitors : %d\n", test->nMonitors);
     //printf("Number of monitors : %d\n", test->nOutputs);
 
-    xcb_randr_monitor_info_iterator_t monitorIterator = xcb_randr_get_monitors_monitors_iterator(test);
+    monitorIterator = xcb_randr_get_monitors_monitors_iterator(monitorsReply);
 
     printf("----Randr monitors info----\n");
     while (monitorIterator.rem > 0) {
@@ -30,7 +33,7 @@ int nbrMonitors (xcb_connection_t *con, xcb_window_t root) {
     }
     printf("---------------------------\n");
 
-    return xcb_randr_get_monitors_monitors_length(test);
+    return xcb_randr_get_monitors_monitors_length(monitorsReply);
 }
 
 int main () {
