@@ -4,6 +4,7 @@
 * https://xcb.freedesktop.org/tutorial/
 * http://stackoverflow.com/questions/36966900/xcb-get-all-monitors-ands-their-x-y-coordinates
 * http://stackoverflow.com/questions/13706078/xrandr-related-c-programming
+* https://xcb.freedesktop.org/manual/modules.html
 
 # Examples : 
 * http://hack.org/mc/hacks/mcwm/

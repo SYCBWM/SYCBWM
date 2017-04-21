@@ -4,6 +4,7 @@
 #include <xcb/randr.h>
 #include <jmorecfg.h>
 #include <stdbool.h>
+#include <Xos.h>
 
 int nbrMonitors(xcb_connection_t *con, xcb_window_t root) {
     xcb_randr_monitor_info_t *infoMonitor;
@@ -41,7 +42,7 @@ int main () {
     xcb_screen_t            *screen;            // Screen
     int                     screen_nbr;         // Screen number
     //xcb_screen_iterator_t   iter;               // Screen iterator
-    xcb_window_t            win;                // Window
+    xcb_window_t            root;                // Window
     uint32_t                value_mask;
     uint32_t                value_list[2];
     boolean                 finished = false;
@@ -76,7 +77,7 @@ int main () {
     printf("Number of monitors : %d\n", nbrMonitors(con, screen->root)); // Returns the real number of screens
 
     // Ask for a window's id
-    win = xcb_generate_id(con);
+    root = xcb_generate_id(con);
     value_mask = XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK;
     value_list[0] = screen->white_pixel;
     value_list[1] = XCB_EVENT_MASK_EXPOSURE | XCB_EVENT_MASK_BUTTON_PRESS |
@@ -85,7 +86,7 @@ int main () {
     // Creating the window
     xcb_create_window(con, // Connection
                       XCB_COPY_FROM_PARENT, // Depth
-                      win, // Id
+                      root, // Id
                       screen->root, // Parent window
                       0,0, // x,y
                       screen->width_in_pixels,screen->height_in_pixels, // Size: w,h
@@ -94,26 +95,60 @@ int main () {
                       screen->root_visual, // Visual
                       value_mask, value_list);
 
+    /* set the title of the window */
+
+    char *title = "SYCBWM";
+    xcb_change_property (con,
+                         XCB_PROP_MODE_REPLACE,
+                         root,
+                         XCB_ATOM_WM_NAME,
+                         XCB_ATOM_STRING,
+                         8,
+                         strlen(title),
+                         title);
+
+    // Messing with window tree
+    xcb_query_tree_cookie_t cookie_tree = xcb_query_tree(con, root);
+    xcb_query_tree_reply_t *reply_tree = xcb_query_tree_reply(con, cookie_tree, NULL);
+    printf("Size of tree : %u\n", xcb_query_tree_children_length(reply_tree));
+    xcb_window_t *test_child = xcb_query_tree_children(reply_tree);
+
+
     // Map window on the screen
-    xcb_map_window(con, win);
+    xcb_map_window(con, root);
     xcb_flush(con);
 
+    // Event loop
     while(!finished && (event = xcb_wait_for_event(con))) {
         switch(event->response_type) {
             case XCB_KEY_PRESS:
                 btnPressed = ((xcb_key_press_event_t*)event);
                 printf("\nKeycode: %d\n", btnPressed->detail);
-                /* ESC */
+
                 if (btnPressed->detail == 9) { // Finish if escape is pressed
+                    /* ESC */
                     finished = true;
+                } else if (btnPressed->detail == 30) {
+                    /* U */
+                    // Doesn't work with root window which is under another window manager ?
+                    // Doesn't work because it simply isn't a subwindow ?
+                    printf("Unmapping window\n");
+                    xcb_unmap_window(con, root);
+                    sleep(5);
+                    printf("Re-Mapping window");
+                    xcb_map_window(con, root);
                 }
                 break;
             case XCB_BUTTON_PRESS:
+                // Printing information about button pressed
                 printf("\nButton pressed: %u\n", ((xcb_button_press_event_t*)event)->detail);
                 printf("X-coordinate: %u\n", ((xcb_button_press_event_t*)event)->event_x);
                 printf("Y-coordinate: %u\n", ((xcb_button_press_event_t*)event)->event_y);
                 break;
             case XCB_EXPOSE:
+                break;
+            default:
+                printf("something else\n");
                 break;
         }
         free(event);
